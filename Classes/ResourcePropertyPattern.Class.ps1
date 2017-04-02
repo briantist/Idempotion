@@ -30,7 +30,6 @@ Class ResourcePropertyPattern
 
     [bool] MatchResource([Microsoft.PowerShell.DesiredStateConfiguration.DscResourceInfo]$Resource)
     {
-        #return $Resource.Name -ilike $this.ResourcePattern
         return $this.MatchResource($Resource.Name)
     }
 
