@@ -7,8 +7,8 @@ InModuleScope $moduleName {
     Describe "New-FunctionFromDefinition" {
 
         $defs = Get-DefaultDefinitions
-        $mod = 'PSDesiredStateConfiguration'
-        $resource = Get-DscResource -Module $mod | Select-Object -First 1
+        $dscModule = 'PSDesiredStateConfiguration'
+        $resource = Get-DscResource -Module $dscModule | Select-Object -First 1
 
         $defs.Verbs.GetEnumerator() | ForEach-Object -Process {
             $propBase = @{
@@ -16,7 +16,7 @@ InModuleScope $moduleName {
                 CommandDefinition = $_.Value
                 ResourceName = $resource.Name
                 ParamBlock = '[Parameter()]$Fake'
-                DscModule = $mod
+                DscModule = $dscModule
                 Snippets = $defs.Snippets
             }
 
