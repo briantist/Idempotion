@@ -8,4 +8,4 @@ install:
  - cinst pester
  
 test_script:
-  - ps: . .\appveyor.pester.ps1 -Finalize
+  - ps: . .\appveyor.pester.ps1
