@@ -38,7 +38,7 @@ InModuleScope $moduleName {
                     }
 
                     It 'generates a semantically valid function' {
-                        [ScriptBlock]::Create($result) | Should Not throw
+                        { [ScriptBlock]::Create($result) } | Should Not throw
                     }
                 }
             }
