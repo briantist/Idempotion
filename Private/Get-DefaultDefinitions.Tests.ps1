@@ -1,9 +1,9 @@
-﻿$modulePath = $PSScriptRoot | Split-Path -Parent
-$moduleName = $modulePath | Split-Path -Leaf
+﻿param(
+    [System.Management.Automation.PSModuleInfo]
+    $Module = (Import-Module -Name ($PSScriptRoot | Split-Path -Parent) -Force -PassThru -ErrorAction Stop)
+)
 
-Import-Module -Name $modulePath -Force
-
-InModuleScope $moduleName {
+InModuleScope $Module.Name {
     Describe "Get-DefaultDefinitions" {
         $result = Get-DefaultDefinitions
 

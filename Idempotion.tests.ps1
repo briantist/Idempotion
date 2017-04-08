@@ -23,11 +23,11 @@ Describe 'Idempotion Module' -Tags Root {
 
     Context "Loading $moduleName" {
         $Error.Clear()
-        $module = Import-Module -Name $modulePath -Force -PassThru -ErrorAction SilentlyContinue
+        $Global:TestModule = Import-Module -Name $modulePath -Force -PassThru -ErrorAction SilentlyContinue
         $errorAfter = $Error.Clone()
 
         It 'loaded successfully' {
-            $module | Should Not BeNullOrEmpty
+            $Global:TestModule | Should Not BeNullOrEmpty
         }
 
         It 'raised no non-terminating errors' {

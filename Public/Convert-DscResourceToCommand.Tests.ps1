@@ -1,7 +1,7 @@
-﻿$modulePath = $PSScriptRoot | Split-Path -Parent
-$moduleName = $modulePath | Split-Path -Leaf
-
-Import-Module -Name $modulePath -Force
+﻿param(
+    [System.Management.Automation.PSModuleInfo]
+    $Module = (Import-Module -Name ($PSScriptRoot | Split-Path -Parent) -Force -PassThru -ErrorAction Stop)
+)
 
 Describe "Convert-DscResourceToCommand"  {
     It "does something useful" -Pending {

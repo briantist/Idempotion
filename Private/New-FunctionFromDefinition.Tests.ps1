@@ -1,9 +1,9 @@
-﻿$modulePath = $PSScriptRoot | Split-Path -Parent
-$moduleName = $modulePath | Split-Path -Leaf
+﻿param(
+    [System.Management.Automation.PSModuleInfo]
+    $Module = (Import-Module -Name ($PSScriptRoot | Split-Path -Parent) -Force -PassThru -ErrorAction Stop)
+)
 
-Import-Module -Name $modulePath -Force
-
-InModuleScope $moduleName {
+InModuleScope $Module.Name {
     Describe "New-FunctionFromDefinition" {
 
         $defs = Get-DefaultDefinitions
@@ -28,7 +28,7 @@ InModuleScope $moduleName {
             )
 
             foreach ($propSet in $props) {
-                Context "For verb $($_.Key) with ShouldProcess '$($propSet.ShouldProcess)' and HardPrefix '$($propSet.HardPrefix)'" {
+                Context "For verb '$($_.Key)' with ShouldProcess '$($propSet.ShouldProcess)' and HardPrefix '$($propSet.HardPrefix)'" {
 
                     $result = New-Object PSObject -Property $propSet | 
                         New-FunctionFromDefinition
@@ -38,7 +38,7 @@ InModuleScope $moduleName {
                     }
 
                     It 'generates a semantically valid function' {
-                        { [ScriptBlock]::Create($result) } | Should Not throw
+                        { [ScriptBlock]::Create($result) } | Should Not Throw
                     }
                 }
             }
