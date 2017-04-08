@@ -41,12 +41,14 @@ $Subs | ForEach-Object -Process {
     $thisDir | 
     Get-ChildItem -Filter $sub.Filter -Exclude $sub.Exclude -Recurse:$sub.Recurse -ErrorAction Ignore | ForEach-Object -Process {
         try {
-            . $_.FullName
+            $Unit = $_.FullName
+            . $Unit
             if ($sub.Export -or $exportAll) {
                 Export-ModuleMember -Function $_.BaseName
             }
         } catch {
-            Write-Error -Message "Could not import $($_.FullName)"
+            $e = "Could not import '$Unit' with exception: `n`n`n$($_.Exception)" -as $_.Exception.GetType()
+            throw $e
         }
     }
 }
