@@ -197,24 +197,24 @@ param(
 
     End {
         try {
-            $modCommonParams = @{}
+            if (-not $AsString) {
+                throw [System.NotImplementedException]'Not done yet..'
+
+                $modCommonParams = @{}
             
-            if ($AsCustomObject) {
-                $modCommonParams.AsCustomObject = $true
+                if ($AsCustomObject) {
+                    $modCommonParams.AsCustomObject = $true
+                }
+
+                if ($ModuleName) {
+                    $modCommonParams.Name = $ModuleName
+                }
+
+                $nmoParams = $modCommonParams.Clone()
+                $nmoParams.ScriptBlock = $Functions -join "`n"
+
+                $ipmoParams = $modCommonParams.Clone()
             }
-
-            if ($ModuleName) {
-                $modCommonParams.Name = $ModuleName
-            }
-
-            $nmoParams = $modCommonParams.Clone()
-            $nmoParams.ScriptBlock = $Functions -join "`n"
-
-            $ipmoParams = $modCommonParams.Clone()
-
-                        
-
-
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
