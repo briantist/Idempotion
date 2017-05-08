@@ -1,9 +1,9 @@
 ﻿function Convert-DscResourceToCommand {
-[CmdletBinding()]
-[OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module-Import-PassThru')]
+[CmdletBinding(DefaultParameterSetName = 'Module')]
+[OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module')]
+[OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module-Import')]
 [OutputType([System.Management.Automation.PSObject], ParameterSetName = 'Module-AsCustomObject')]
 [OutputType([String], ParameterSetName = 'AsString')]
-[OutputType([void], ParameterSetName = 'Module-Import')]
 param(
     [Parameter(
         Mandatory,
@@ -37,11 +37,15 @@ param(
     [SupportsWildcards()]
     [ValidateScript( {
         [ResourcePropertyPattern]::new($_) -as [bool]
+        throw [System.NotImplementedException]'This parameter is not implemented yet.'
     } )]
     [String[]]
     $ExcludeProperty = '*:DependsOn' ,
 
     [Parameter()]
+    [ValidateScript( {
+        throw [System.NotImplementedException]'This parameter is not implemented yet.'
+    } )]
     [Switch]
     $ExcludeMandatory ,
 
@@ -65,10 +69,10 @@ param(
     $DefaultResourceModuleName = 'PSDesiredStateConfiguration' ,
 
     [Parameter(
-        ParameterSetName = 'Module-Import'
+        ParameterSetName = 'Module'
     )]
     [Parameter(
-        ParameterSetName = 'Module-Import-PassThru'
+        ParameterSetName = 'Module-Import'
     )]
     [Parameter(
         ParameterSetName = 'Module-AsCustomObject'
@@ -81,9 +85,6 @@ param(
     [Parameter(
         ParameterSetName = 'Module-Import'
     )]
-    [Parameter(
-        ParameterSetName = 'Module-Import-PassThru'
-    )]
     [Alias('SoftPrefix')]
     [ValidateNotNullOrEmpty()]
     [String]
@@ -92,33 +93,31 @@ param(
     [Parameter(
         ParameterSetName = 'Module-Import'
     )]
-    [Parameter(
-        ParameterSetName = 'Module-Import-PassThru'
-    )]
     [Switch]
     $NoClobber ,
 
     [Parameter(
         ParameterSetName = 'Module-Import'
     )]
-    [Parameter(
-        ParameterSetName = 'Module-Import-PassThru'
-    )]
     [Switch]
     $DisableNameChecking ,
 
     [Parameter(
-        ParameterSetName = 'Module-Import-PassThru' ,
-        Mandatory
+        ParameterSetName = 'Module'
     )]
+    [Parameter(
+        ParameterSetName = 'Module-Import'
+    )]
+    [PSDefaultValue(Help = 'Always active when creating a module without importing it')]
     [Switch]
     $PassThru ,
 
     [Parameter(
-        ParameterSetName = 'Module-Import-PassThru'
+        ParameterSetName = 'Module-Import' ,
+        Mandatory
     )]
     [Switch]
-    $NoImport ,
+    $Import ,
 
     [Parameter(
         ParameterSetName = 'Module-AsCustomObject' ,
@@ -131,16 +130,14 @@ param(
         ParameterSetName = 'Module-Import'
     )]
     [Parameter(
-        ParameterSetName = 'Module-Import-PassThru'
-    )]
-    [Parameter(
         ParameterSetName = 'Module-AsCustomObject'
     )]
     [Switch]
     $Force ,
 
     [Parameter(
-        ParameterSetName = 'AsString'
+        ParameterSetName = 'AsString' ,
+        Mandatory
     )]
     [Switch]
     $AsString
@@ -148,8 +145,10 @@ param(
 
     Begin {
         try {
+            $boundKeys = $PSBoundParameters.Keys.GetEnumerator().ForEach({$_})
+
             if ($DefaultResourceModuleName) {
-                $DefaultModule = Get-Module -Name $DefaultModuleName
+                $DefaultModule = Get-Module -Name $DefaultResourceModuleName
             }
 
             $Definitions = Get-FilteredDefinitions -CommandDefinition $CommandDefinition -IncludeVerb $IncludeVerb -ExcludeVerb $ExcludeVerb
@@ -198,22 +197,48 @@ param(
     End {
         try {
             if (-not $AsString) {
-                throw [System.NotImplementedException]'Not done yet..'
-
-                $modCommonParams = @{}
+                $nmoParams = @{
+                    ScriptBlock = [ScriptBlock]::Create($Functions -join "`n")
+                }
             
                 if ($AsCustomObject) {
-                    $modCommonParams.AsCustomObject = $true
+                    $nmoParams.AsCustomObject = $true
                 }
 
                 if ($ModuleName) {
-                    $modCommonParams.Name = $ModuleName
+                    $nmoParams.Name = $ModuleName
                 }
 
-                $nmoParams = $modCommonParams.Clone()
-                $nmoParams.ScriptBlock = $Functions -join "`n"
+                $ipmoParams = @{}
 
-                $ipmoParams = $modCommonParams.Clone()
+                $ipmoApplicableParamNames = @(
+                     'DisableNameChecking'
+                    ,'Force'
+                    ,'PassThru'
+                    ,'Prefix'
+                    ,'NoClobber'
+                    ,'AsCustomObject'
+                )
+
+                Compare-Object -ReferenceObject $boundKeys -DifferenceObject $ipmoApplicableParamNames -ExcludeDifferent -IncludeEqual |
+                    ForEach-Object -Process {
+                        $paramName = $_.InputObject
+                        $ipmoParams[$paramName] = $PSBoundParameters[$paramName]
+                    }
+
+                $newMod = New-Module @nmoParams -Verbose:$VerbosePreference
+
+                if ($AsCustomObject) {
+                    $newMod
+                } else {
+                    $newMod | Remove-Module -Force -Verbose:$VerbosePreference
+
+                    if ($Import) { # PassThru will be in $ipmoParams so the module will be returned if needed
+                        $newMod | Import-Module @ipmoParams -Global -Verbose:$VerbosePreference
+                    } else {
+                        $newMod  # module is always returned if it's not imported
+                    }
+                }
             }
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
