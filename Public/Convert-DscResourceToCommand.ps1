@@ -220,6 +220,8 @@ param(
                     ,'AsCustomObject'
                 )
 
+                # Just a fancy way of not writing 6+ if statements
+
                 Compare-Object -ReferenceObject $boundKeys -DifferenceObject $ipmoApplicableParamNames -ExcludeDifferent -IncludeEqual |
                     ForEach-Object -Process {
                         $paramName = $_.InputObject
@@ -228,9 +230,22 @@ param(
 
                 $newMod = New-Module @nmoParams -Verbose:$VerbosePreference
 
-                if ($AsCustomObject) {
+                if ($AsCustomObject) { # Just return it directly if we opted for a custom object
                     $newMod
                 } else {
+                    <#
+
+                     New-Module automatically imports the module, but not in a way that makes it discoverable, 
+                     so it has to be removed first.
+                    
+                     If we want it imported, then we re-import it with Import-Module, which will:
+
+                     A) bring it back into the session in a discoverable way (by using Get-Module)
+                     B) allow -Prefix to be applied (not an option with New-Module)
+
+                     If it shouldn't be imported, then we leave it removed and return it to the caller.
+
+                    #>
                     $newMod | Remove-Module -Force -Verbose:$VerbosePreference
 
                     if ($Import) { # PassThru will be in $ipmoParams so the module will be returned if needed
@@ -239,7 +254,7 @@ param(
                         $newMod  # module is always returned if it's not imported
                     }
                 }
-            }
+            } # -not $AsString # In the case of -AsString, the results were returned in the process block
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
