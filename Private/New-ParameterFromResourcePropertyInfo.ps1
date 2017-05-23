@@ -36,11 +36,15 @@ param(
     [Parameter()]
     [AllowEmptyString()]
     [String]
-    $Delimiter = "`n"
+    $Delimiter = "`n" ,
+
+    [Parameter()]
+    [Switch]
+    $NoValidateSet
 )
 
     Process {
-        $valset = if ($Values.Count) {
+        $valset = if (-not $NoValidateSet -and $Values.Count) {
             $set = $Values.ForEach( {
                 $escaped = $_.Replace("'" , "''")
                 "'$escaped'"

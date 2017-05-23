@@ -22,12 +22,16 @@ param(
         ParameterSetName = 'AsArray'
     )]
     [Switch]
-    $AsArray
+    $AsArray ,
+
+    [Parameter()]
+    [Switch]
+    $NoValidateSet
 )
 
     Process {
         $params = $Resource.Properties |
-            New-ParameterFromResourcePropertyInfo
+            New-ParameterFromResourcePropertyInfo -NoValidateSet:$NoValidateSet
 
         if ($AsArray.IsPresent) {
             $params

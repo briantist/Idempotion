@@ -68,6 +68,10 @@ param(
     [String]
     $DefaultResourceModuleName = 'PSDesiredStateConfiguration' ,
 
+    [Parameter()]
+    [Switch]
+    $NoValidateSet = $AsCustomObject ,
+
     [Parameter(
         ParameterSetName = 'Module'
     )]
@@ -154,6 +158,10 @@ param(
             $Definitions = Get-FilteredDefinitions -CommandDefinition $CommandDefinition -IncludeVerb $IncludeVerb -ExcludeVerb $ExcludeVerb
 
             $Functions = @()
+
+            if ($AsCustomObject -and $boundKeys -notcontains 'CommandDefinition') {
+                Write-Warning -Message "-AsCustomObject is only useful for very specific scenarios, and the default module definitions do not work correctly with it. This call will succeed, but the method calls will fail."
+            }
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -166,7 +174,7 @@ param(
                     $ResourceDefinition.Module = $DefaultModule
                 }
 
-                $ParamBlock = New-ParameterBlockFromResourceDefinition -Resource $ResourceDefinition
+                $ParamBlock = New-ParameterBlockFromResourceDefinition -Resource $ResourceDefinition -NoValidateSet:$NoValidateSet
 
                 $DscModule = $ResourceDefinition.ModuleName
 
