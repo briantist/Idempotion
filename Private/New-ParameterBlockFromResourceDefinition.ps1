@@ -26,11 +26,33 @@ param(
 
     [Parameter()]
     [Switch]
-    $NoValidateSet
+    $NoValidateSet ,
+
+    [Parameter()]
+    [AllowEmptyCollection()]
+    [SupportsWildcards()]
+    [ResourcePropertyPattern[]]
+    $ExcludeProperty ,
+
+    [Parameter()]
+    [Switch]
+    $ExcludeMandatory
 )
 
     Process {
         $params = $Resource.Properties |
+            Where-Object -FilterScript {
+                $thisProp = $_
+                -not (
+                    $ExcludeProperty.Where({
+                        $thisExclusion = $_
+                        $thisExclusion.Match($Resource, $thisProp) -and (
+                            $ExcludeMandatory -or
+                            -not $thisProp.IsMandatory
+                        )                 
+                    },[System.Management.Automation.WhereOperatorSelectionMode]::First)
+                )
+            } |
             New-ParameterFromResourcePropertyInfo -NoValidateSet:$NoValidateSet
 
         if ($AsArray.IsPresent) {
