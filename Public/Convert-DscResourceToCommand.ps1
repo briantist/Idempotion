@@ -37,15 +37,11 @@ param(
     [SupportsWildcards()]
     [ValidateScript( {
         [ResourcePropertyPattern]::new($_) -as [bool]
-        throw [System.NotImplementedException]'This parameter is not implemented yet.'
     } )]
     [String[]]
     $ExcludeProperty = '*:DependsOn' ,
 
     [Parameter()]
-    [ValidateScript( {
-        throw [System.NotImplementedException]'This parameter is not implemented yet.'
-    } )]
     [Switch]
     $ExcludeMandatory ,
 
@@ -174,7 +170,21 @@ param(
                     $ResourceDefinition.Module = $DefaultModule
                 }
 
-                $ParamBlock = New-ParameterBlockFromResourceDefinition -Resource $ResourceDefinition -NoValidateSet:$NoValidateSet
+                $paramsForParamBlock = @{
+                    Resource = $ResourceDefinition
+                }
+
+                if ($NoValidateSet) {
+                    $paramsForParamBlock.NoValidateSet = $NoValidateSet
+                }
+                if ($ExcludeProperty) {
+                    $paramsForParamBlock.ExcludeProperty = $ExcludeProperty
+                }
+                if ($ExcludeMandatory) {
+                    $paramsForParamBlock.ExcludeMandatory = $ExcludeMandatory
+                }
+
+                $ParamBlock = New-ParameterBlockFromResourceDefinition @paramsForParamBlock
 
                 $DscModule = $ResourceDefinition.ModuleName
 
