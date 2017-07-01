@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<helpItems xmlns="http://msh" schema="maml">
+	<command:command
+  xmlns:maml="http://schemas.microsoft.com/maml/2004/10"
+  xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" 
+  xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10">
+		<command:details>
+			<command:name>Convert-DscResourceToCommand</command:name>
+			<command:verb>Convert</command:verb>
+			<command:noun>DscResourceToCommand</command:noun>
+			<maml:description>
+				<maml:para>Creates command(s) from one or more DSC resources.</maml:para>
+			</maml:description>
+		</command:details>
+	</command:command>
+</helpItems>

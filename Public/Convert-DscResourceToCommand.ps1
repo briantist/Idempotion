@@ -1,4 +1,7 @@
-﻿function Convert-DscResourceToCommand {
+﻿#.SYNOPSIS
+# Test
+#.EXTERNALHELP Idempotion.psm1-Help.xml
+function Convert-DscResourceToCommand {
 [CmdletBinding(DefaultParameterSetName = 'Module')]
 [OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module')]
 [OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module-Import')]
