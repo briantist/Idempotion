@@ -1,4 +1,9 @@
-﻿function Convert-DscResourceToCommand {
+﻿<#
+.SYNOPSIS
+
+Creates commands from DSC resources.
+#>
+function Convert-DscResourceToCommand {
 [CmdletBinding(DefaultParameterSetName = 'Module')]
 [OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module')]
 [OutputType([System.Management.Automation.PSModuleInfo], ParameterSetName = 'Module-Import')]
