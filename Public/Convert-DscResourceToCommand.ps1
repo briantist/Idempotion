@@ -272,7 +272,12 @@ param(
                     $newMod | Remove-Module -Force -Verbose:$VerbosePreference
 
                     if ($Import) { # PassThru will be in $ipmoParams so the module will be returned if needed
-                        $newMod | Import-Module @ipmoParams -Global -Verbose:$VerbosePreference
+                        if ($Force) {
+                            Remove-Module -Name $newMod.Name -Force -ErrorAction Ignore
+                        }
+                        if ($Force -or -not (Get-Module -Name $newMod.Name -ErrorAction Ignore)) {
+                            $newMod | Import-Module @ipmoParams -Global -Verbose:$VerbosePreference
+                        }
                     } else {
                         $newMod  # module is always returned if it's not imported
                     }
