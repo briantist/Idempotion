@@ -251,7 +251,7 @@ param(
                         $ipmoParams[$paramName] = $PSBoundParameters[$paramName]
                     }
 
-                $newMod = New-Module @nmoParams -Verbose:$VerbosePreference
+                $newMod = New-Module @nmoParams -Verbose:$false
 
                 if ($AsCustomObject) { # Just return it directly if we opted for a custom object
                     $newMod
@@ -269,11 +269,11 @@ param(
                      If it shouldn't be imported, then we leave it removed and return it to the caller.
 
                     #>
-                    $newMod | Remove-Module -Force -Verbose:$VerbosePreference
+                    $newMod | Remove-Module -Force -Verbose:$false
 
                     if ($Import) { # PassThru will be in $ipmoParams so the module will be returned if needed
                         if ($Force) {
-                            Remove-Module -Name $newMod.Name -Force -ErrorAction Ignore
+                            Remove-Module -Name $newMod.Name -Force -ErrorAction Ignore -Verbose:$VerbosePreference
                         }
                         if ($Force -or -not (Get-Module -Name $newMod.Name -ErrorAction Ignore)) {
                             $newMod | Import-Module @ipmoParams -Global -Verbose:$VerbosePreference
