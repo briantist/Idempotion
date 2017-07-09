@@ -22,7 +22,7 @@ param(
 )
     ${Snippet_Parameterizerator}
     
-    if (`$PSCmdlet.ShouldProcess('${Verb}', '${Resource} DSC Resource')) {
+    if (`$PSCmdlet.ShouldProcess('${Resource} DSC Resource', '${Verb}')) {
         Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$VerbosePreference
     }
 }
