@@ -22,8 +22,14 @@ param(
 )
     ${Snippet_Parameterizerator}
     
-    if (`$PSCmdlet.ShouldProcess('${Verb}', '${Resource} DSC Resource')) {
-        Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$VerbosePreference
+    if (`$PSCmdlet.ShouldProcess('${Resource} DSC Resource', '${Verb}')) {
+
+        `$oldVerbosePreference = `$VerbosePreference
+        `$VerbosePreference = [System.Management.Automation.ActionPreference]::SilentlyContinue
+
+        Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$oldVerbosePreference
+
+        `$VerbosePreference = `$oldVerbosePreference
     }
 }
 '@
@@ -36,7 +42,12 @@ param(
 )
     ${Snippet_Parameterizerator}
     
-    Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$VerbosePreference
+    `$oldVerbosePreference = `$VerbosePreference
+    `$VerbosePreference = [System.Management.Automation.ActionPreference]::SilentlyContinue
+
+    Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$oldVerbosePreference
+
+    `$VerbosePreference = `$oldVerbosePreference
 }
 '@
 
@@ -49,7 +60,12 @@ param(
 )
     ${Snippet_Parameterizerator}
     
-    Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$VerbosePreference
+    `$oldVerbosePreference = `$VerbosePreference
+    `$VerbosePreference = [System.Management.Automation.ActionPreference]::SilentlyContinue
+
+    Invoke-DscResource -Name '${Resource}' -ModuleName '${ModuleName}' -Method '${Verb}' -Property `$params -Verbose:`$oldVerbosePreference
+
+    `$VerbosePreference = `$oldVerbosePreference
 }
 '@
 

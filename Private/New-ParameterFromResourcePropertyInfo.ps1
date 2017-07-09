@@ -46,7 +46,7 @@ param(
     Process {
         $valset = if (-not $NoValidateSet -and $Values.Count) {
             $set = $Values.ForEach( {
-                $escaped = $_.Replace("'" , "''")
+                $escaped = [System.Management.Automation.Language.CodeGeneration]::EscapeSingleQuotedStringContent($_)
                 "'$escaped'"
             } ) -join ','
             "[ValidateSet($set)]"
