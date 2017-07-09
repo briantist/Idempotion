@@ -13,6 +13,7 @@ InModuleScope $Module.Name {
                  'Present'
                 ,'Absent'
                 ,"Single ' Quote"
+                ,"Weird ’ Quote"
             )
         }
         $testNoSet = [PSCustomObject]@{
