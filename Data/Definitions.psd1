@@ -89,18 +89,64 @@ param(
 
     Snippets = @{
         Parameterizerator = @'
-# From: https://www.briantist.com/how-to/splatting-psboundparameters-default-values-optional-parameters/
-$params = @{}
-foreach($h in $MyInvocation.MyCommand.Parameters.GetEnumerator()) {
-    try {
-        $key = $h.Key
-        $val = Get-Variable -Name $key -ValueOnly -ErrorAction Stop
-        if (([String]::IsNullOrEmpty($val) -and (!$PSBoundParameters.ContainsKey($key)))) {
-            throw "A blank value that wasn't supplied by the user."
+# Originally from: https://www.briantist.com/how-to/splatting-psboundparameters-default-values-optional-parameters/
+# Modified in issues #22 and #23: 
+# - https://github.com/briantist/Idempotion/issues/22
+# - https://github.com/briantist/Idempotion/issues/23
+function Get-AllParameters {
+[CmdletBinding()]
+[OutputType([System.Collections.Hashtable])]
+param(
+    [Parameter(
+        Mandatory
+    )]
+    [System.Collections.Generic.Dictionary[System.String,System.Object]]
+    $BoundParameters ,
+
+    [Parameter(
+        Mandatory
+    )]
+    [System.Management.Automation.InvocationInfo]
+    $Context ,
+
+    [Parameter()]
+    [Alias('Exclude')]
+    [AllowEmptyCollection()]
+    [ValidateNotNull()]
+    [String[]]
+    $ExcludeParameter ,
+
+    [Parameter()]
+    [Alias('ExcludeCommon')]
+    [Alias('NoCommon')]
+    [Switch]
+    $ExcludeCommonParameters ,
+
+    [Parameter()]
+    [Alias('ExcludeOptionalCommon')]
+    [Alias('NoOptionalCommon')]
+    [Switch]
+    $ExcludeOptionalCommonParameters
+)
+    $allParams = [System.Collections.Hashtable]::new($BoundParameters)
+    foreach ($param in $Context.MyCommand.Parameters.GetEnumerator()) {
+        if (-not $allParams.ContainsKey($param.Key) -and ($value = Get-Variable -Name $param.Key -ValueOnly -ErrorAction Ignore)) {
+            $allParams.Add($param.Key, $value)
         }
-        $params[$key] = $val
-    } catch {}
+    }
+    if ($ExcludeCommonParameters) {
+        [System.Management.Automation.PSCmdlet]::CommonParameters.ForEach({ $allParams.Remove($_) })
+    }
+    if ($ExcludeOptionalCommonParameters) {
+        [System.Management.Automation.PSCmdlet]::OptionalCommonParameters.ForEach({ $allParams.Remove($_) })
+    }
+    if ($ExcludeParameter) {
+        $ExcludeParameter.ForEach({ $allParams.Remove($_) })
+    }
+
+    $allParams
 }
+$params = Get-AllParameters -BoundParameters $PSBoundParameters -Context $MyInvocation -ExcludeCommonParameters -ExcludeOptionalCommonParameters
 '@
     } # Snippets
 }
